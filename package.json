@@ -10,7 +10,7 @@
     "nodemon": "^1.19.4"
   },
   "scripts": {
-    "start": "nodemon server.js -e html,css,js",
+    "start": "nodemon index.js -e html, css, js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

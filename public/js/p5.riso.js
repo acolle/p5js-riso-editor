@@ -81,12 +81,17 @@ const RISOCOLORS = [
   {name: 'FLUORESCENTGREEN', color: [68, 214, 44]}
 ];
 
+function _getP5Instance() {
+  return window._p5Instance || p5.instance
+}
+
 class Riso extends p5.Graphics {
   constructor(channelColor, w, h) {
-    if (!w) w = width;
-    if (!h) h = height;
+    const p = _getP5Instance();
+    if (!w) w = p.width;
+    if (!h) h = p.height;
 
-    super(w, h, null, p5.instance);
+    super(w, h, null, p);
 
     let foundColor;
 
@@ -125,7 +130,8 @@ class Riso extends p5.Graphics {
     }
 
     //this.filter(GRAY);
-    let buffer = createGraphics(this.width, this.height);
+    const p = _getP5Instance();
+    let buffer = p.createGraphics(this.width, this.height);
 
     buffer.loadPixels();
     this.loadPixels();
@@ -157,8 +163,9 @@ class Riso extends p5.Graphics {
   }
 
   image(img, x, y, w, h) {
-    let alphaValue = alpha(this.drawingContext.fillStyle)/255;
-    let newImage = createImage(img.width, img.height);
+    const p = _getP5Instance()
+    let alphaValue = p.alpha(this.drawingContext.fillStyle)/255;
+    let newImage = p.createImage(img.width, img.height);
     img.loadPixels();
     newImage.loadPixels();
     for (let i=0; i < newImage.pixels.length; i+=4) {
@@ -178,14 +185,15 @@ class Riso extends p5.Graphics {
   }
 
   draw() {
-    image(this, 0, 0);
+    _getP5Instance().image(this, 0, 0);
   }
 }
 
 function drawRiso() {
-  blendMode(MULTIPLY);
+  const p = _getP5Instance();
+  p.blendMode(p.MULTIPLY);
   Riso.channels.forEach(c => c.draw());
-  blendMode(BLEND);
+  p.blendMode(p.BLEND);
 }
 
 function exportRiso() {
@@ -227,8 +235,9 @@ function extractRGBChannel(img, c) {
   if (c == "r" || c == "red") c = 0;
   if (c == "g" || c == "green") c = 1;
   if (c == "b" || c == "blue") c = 2;
+  const p = _getP5Instance();
 
-  let channel = createImage(img.width, img.height);
+  let channel = p.createImage(img.width, img.height);
   img.loadPixels();
   channel.loadPixels();
   for (let i = 0; i < img.pixels.length; i+=4) {
@@ -242,6 +251,8 @@ function extractRGBChannel(img, c) {
 }
 
 function extractCMYKChannel(img, c) {
+  const p = _getP5Instance();
+
   let desiredCMYKChannels = [];
   if(typeof c == "number" && c < 4) {
     desiredCMYKChannels.push(c);
@@ -252,7 +263,7 @@ function extractCMYKChannel(img, c) {
     if (c == "yellow" || c.includes("y")) desiredCMYKChannels.push(2);
     if (c == "black" || c.includes("k")) desiredCMYKChannels.push(3);
   }
-  let channel = createImage(img.width, img.height);
+  let channel = p.createImage(img.width, img.height);
   img.loadPixels();
   channel.loadPixels();
   for (let i = 0; i < img.pixels.length; i+=4) {
@@ -273,6 +284,83 @@ function extractCMYKChannel(img, c) {
   channel.updatePixels();
   return channel;
 }
+
+function halftoneImage(img, shape, frequency, angle, intensity) {
+  if (shape === undefined) shape = "circle";
+  if (frequency === undefined) frequency = 10;
+  if (angle === undefined) angle = 45;
+  if (intensity === undefined) intensity = 127;
+
+  const halftonePatterns = {
+    line(c, x, y, g, d) {
+      c.rect(x, y, g, g * d);
+    },
+    square(c, x, y, g, d) {
+      c.rect(x, y, g * d, g * d);
+    },
+    circle(c, x, y, g, d) {
+      c.ellipse(x, y, d * g, d * g);
+    },
+    ellipse(c, x, y, g, d) {
+      c.ellipse(x, y, g * d * 0.7, g*d);
+    },
+    cross(c, x, y, g, d) {
+      c.rect(x, y, g, g*d);
+      c.rect(x, y, g * d, g);
+    },
+  }
+
+  patternFunction = typeof shape === "function" ? shape : halftonePatterns[shape];
+
+  const w = img.width;
+  const h = img.height;
+
+  const p = _getP5Instance();
+
+  const rotatedCanvas = p.createGraphics(img.width*2, img.height*2);
+  rotatedCanvas.background(255);
+  rotatedCanvas.imageMode(p.CENTER);
+  rotatedCanvas.push();
+  rotatedCanvas.translate(img.width, img.height);
+  rotatedCanvas.rotate(-angle);
+  rotatedCanvas.image(img, 0, 0);
+  rotatedCanvas.pop();
+  rotatedCanvas.loadPixels();
+
+  const out = p.createGraphics(w*2, h*2);
+  out.background(255);
+  out.ellipseMode(p.CORNER);
+  out.rectMode(p.CENTER);
+  out.fill(0);
+  out.noStroke();
+
+  let gridsize = frequency;
+
+  for (let x=0; x < w*2; x+=gridsize) {
+    for (let y=0; y < h*2; y+=gridsize) {
+      const avg = rotatedCanvas.pixels[(x + y*w*2)* 4];
+
+      if (avg < 255) {
+        const darkness = (255 - avg) / 255;
+        patternFunction(out, x, y, gridsize, darkness);
+      }
+    }
+  }
+  rotatedCanvas.background(255);
+  rotatedCanvas.push();
+  rotatedCanvas.translate(w, h);
+  rotatedCanvas.rotate(angle);
+  rotatedCanvas.image(out, 0, 0);
+  rotatedCanvas.pop();
+
+  const result = rotatedCanvas.get(w/2, h/2, w, h);
+  if (intensity === false) {
+    return result;
+  } else {
+    return ditherImage(result, "none", intensity);
+  }
+}
+
 
 function ditherImage(img, type, threshold) {
   // source adapted from: https://github.com/meemoo/meemooapp/blob/44236a29574812026407c0288ab15390e88b556a/src/nodes/image-monochrome-worker.js

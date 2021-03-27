@@ -7,11 +7,183 @@
   </head>
   <body>
     <div id="canvas"></div>
-    <div id="options"></div>
+
+    <i id="showOptions" class="gg-arrow-left-o"></i>
+
+    <div id="options">
+
+      <i id="hideOptions" class="gg-close-o"></i>
+
+      <p>All Riso colours</p>
+      <span id="all-colors">
+        <span class="riso-color riso-BLACK" style="background-color: rgb(0, 0, 0);">BLACK</span> <span class="riso-color riso-BURGUNDY" style="background-color: rgb(145, 78, 114);">BURGUNDY</span>
+        <span class="riso-color riso-BLUE" style="background-color: rgb(0, 120, 191);">BLUE</span> <span class="riso-color riso-GREEN" style="background-color: rgb(0, 169, 92);">GREEN</span>
+        <span class="riso-color riso-MEDIUMBLUE" style="background-color: rgb(50, 85, 164);">MEDIUMBLUE</span> <span class="riso-color riso-BRIGHTRED" style="background-color: rgb(241, 80, 96);">BRIGHTRED</span>
+        <span class="riso-color riso-RISOFEDERALBLUE" style="background-color: rgb(61, 85, 136);">RISOFEDERALBLUE</span> <span class="riso-color riso-PURPLE" style="background-color: rgb(118, 91, 167);">PURPLE</span>
+        <span class="riso-color riso-TEAL" style="background-color: rgb(0, 131, 138);">TEAL</span> <span class="riso-color riso-FLATGOLD" style="background-color: rgb(187, 139, 65);">FLATGOLD</span>
+        <span class="riso-color riso-HUNTERGREEN" style="background-color: rgb(64, 112, 96);">HUNTERGREEN</span> <span class="riso-color riso-RED" style="background-color: rgb(255, 102, 94);">RED</span>
+        <span class="riso-color riso-BROWN" style="background-color: rgb(146, 95, 82);">BROWN</span> <span class="riso-color riso-YELLOW" style="background-color: rgb(255, 232, 0);">YELLOW</span>
+        <span class="riso-color riso-MARINERED" style="background-color: rgb(210, 81, 94);">MARINERED</span> <span class="riso-color riso-ORANGE" style="background-color: rgb(255, 108, 47);">ORANGE</span>
+        <span class="riso-color riso-FLUORESCENTPINK" style="background-color: rgb(255, 72, 176);">FLUORESCENTPINK</span> <span class="riso-color riso-LIGHTGRAY" style="background-color: rgb(136, 137, 138);">LIGHTGRAY</span>
+        <span class="riso-color riso-METALLICGOLD" style="background-color: rgb(172, 147, 110);">METALLICGOLD</span> <span class="riso-color riso-CRIMSON" style="background-color: rgb(228, 93, 80);">CRIMSON</span>
+        <span class="riso-color riso-FLUORESCENTORANGE" style="background-color: rgb(255, 116, 119);">FLUORESCENTORANGE</span> <span class="riso-color riso-CORNFLOWER" style="background-color: rgb(98, 168, 229);">CORNFLOWER</span>
+        <span class="riso-color riso-SKYBLUE" style="background-color: rgb(73, 130, 207);">SKYBLUE</span> <span class="riso-color riso-SEABLUE" style="background-color: rgb(0, 116, 162);">SEABLUE</span>
+        <span class="riso-color riso-LAKE" style="background-color: rgb(35, 91, 168);">LAKE</span> <span class="riso-color riso-INDIGO" style="background-color: rgb(72, 77, 122);">INDIGO</span>
+        <span class="riso-color riso-MIDNIGHT" style="background-color: rgb(67, 80, 96);">MIDNIGHT</span> <span class="riso-color riso-MIST" style="background-color: rgb(213, 228, 192);">MIST</span>
+        <span class="riso-color riso-GRANITE" style="background-color: rgb(165, 170, 168);">GRANITE</span> <span class="riso-color riso-CHARCOAL" style="background-color: rgb(112, 116, 124);">CHARCOAL</span>
+        <span class="riso-color riso-SMOKYTEAL" style="background-color: rgb(95, 130, 137);">SMOKYTEAL</span> <span class="riso-color riso-STEEL" style="background-color: rgb(55, 94, 119);">STEEL</span>
+        <span class="riso-color riso-SLATE" style="background-color: rgb(94, 105, 94);">SLATE</span> <span class="riso-color riso-TURQUOISE" style="background-color: rgb(0, 170, 147);">TURQUOISE</span>
+        <span class="riso-color riso-EMERALD" style="background-color: rgb(25, 151, 93);">EMERALD</span> <span class="riso-color riso-GRASS" style="background-color: rgb(57, 126, 88);">GRASS</span>
+        <span class="riso-color riso-FOREST" style="background-color: rgb(81, 110, 90);">FOREST</span> <span class="riso-color riso-SPRUCE" style="background-color: rgb(74, 99, 93);">SPRUCE</span>
+        <span class="riso-color riso-MOSS" style="background-color: rgb(104, 114, 77);">MOSS</span> <span class="riso-color riso-SEAFOAM" style="background-color: rgb(98, 194, 177);">SEAFOAM</span>
+        <span class="riso-color riso-KELLYGREEN" style="background-color: rgb(103, 179, 70);">KELLYGREEN</span> <span class="riso-color riso-LIGHTTEAL" style="background-color: rgb(0, 157, 165);">LIGHTTEAL</span>
+        <span class="riso-color riso-IVY" style="background-color: rgb(22, 155, 98);">IVY</span> <span class="riso-color riso-PINE" style="background-color: rgb(35, 126, 116);">PINE</span>
+        <span class="riso-color riso-LAGOON" style="background-color: rgb(47, 97, 101);">LAGOON</span> <span class="riso-color riso-VIOLET" style="background-color: rgb(157, 122, 210);">VIOLET</span>
+        <span class="riso-color riso-ORCHID" style="background-color: rgb(170, 96, 191);">ORCHID</span> <span class="riso-color riso-PLUM" style="background-color: rgb(132, 89, 145);">PLUM</span>
+        <span class="riso-color riso-RAISIN" style="background-color: rgb(119, 93, 122);">RAISIN</span> <span class="riso-color riso-GRAPE" style="background-color: rgb(108, 93, 128);">GRAPE</span>
+        <span class="riso-color riso-SCARLET" style="background-color: rgb(246, 80, 88);">SCARLET</span> <span class="riso-color riso-TOMATO" style="background-color: rgb(210, 81, 94);">TOMATO</span>
+        <span class="riso-color riso-CRANBERRY" style="background-color: rgb(209, 81, 122);">CRANBERRY</span> <span class="riso-color riso-MAROON" style="background-color: rgb(158, 76, 110);">MAROON</span>
+        <span class="riso-color riso-RASPBERRYRED" style="background-color: rgb(209, 81, 122);">RASPBERRYRED</span> <span class="riso-color riso-BRICK" style="background-color: rgb(167, 81, 84);">BRICK</span>
+        <span class="riso-color riso-LIGHTLIME" style="background-color: rgb(227, 237, 85);">LIGHTLIME</span> <span class="riso-color riso-SUNFLOWER" style="background-color: rgb(255, 181, 17);">SUNFLOWER</span>
+        <span class="riso-color riso-MELON" style="background-color: rgb(255, 174, 59);">MELON</span> <span class="riso-color riso-APRICOT" style="background-color: rgb(246, 160, 77);">APRICOT</span>
+        <span class="riso-color riso-PAPRIKA" style="background-color: rgb(238, 127, 75);">PAPRIKA</span> <span class="riso-color riso-PUMPKIN" style="background-color: rgb(255, 111, 76);">PUMPKIN</span>
+        <span class="riso-color riso-BRIGHTOLIVEGREEN" style="background-color: rgb(180, 159, 41);">BRIGHTOLIVEGREEN</span> <span class="riso-color riso-BRIGHTGOLD" style="background-color: rgb(186, 128, 50);">BRIGHTGOLD</span>
+        <span class="riso-color riso-COPPER" style="background-color: rgb(189, 100, 57);">COPPER</span> <span class="riso-color riso-MAHOGANY" style="background-color: rgb(142, 89, 90);">MAHOGANY</span>
+        <span class="riso-color riso-BISQUE" style="background-color: rgb(242, 205, 207);">BISQUE</span> <span class="riso-color riso-BUBBLEGUM" style="background-color: rgb(249, 132, 202);">BUBBLEGUM</span>
+        <span class="riso-color riso-LIGHTMAUVE" style="background-color: rgb(230, 181, 201);">LIGHTMAUVE</span> <span class="riso-color riso-DARKMAUVE" style="background-color: rgb(189, 140, 166);">DARKMAUVE</span>
+        <span class="riso-color riso-WINE" style="background-color: rgb(145, 78, 114);">WINE</span> <span class="riso-color riso-GRAY" style="background-color: rgb(146, 141, 136);">GRAY</span>
+        <span class="riso-color riso-CORAL" style="background-color: rgb(255, 142, 145);">CORAL</span> <span class="riso-color riso-WHITE" style="background-color: rgb(255, 255, 255);">WHITE</span>
+        <span class="riso-color riso-AQUA" style="background-color: rgb(94, 200, 229);">AQUA</span> <span class="riso-color riso-MINT" style="background-color: rgb(130, 216, 213);">MINT</span>
+        <span class="riso-color riso-CLEARMEDIUM" style="background-color: rgb(242, 242, 242);">CLEARMEDIUM</span> <span class="riso-color riso-FLUORESCENTYELLOW" style="background-color: rgb(255, 233, 22);">FLUORESCENTYELLOW</span>
+        <span class="riso-color riso-FLUORESCENTRED" style="background-color: rgb(255, 76, 101);">FLUORESCENTRED</span> <span class="riso-color riso-FLUORESCENTGREEN" style="background-color: rgb(68, 214, 44);">FLUORESCENTGREEN</span>
+      </span>
+
+      <br>
+
+      <p>Selected Riso colours</p>
+      <div id="riso-colours--options"></div>
+
+    </div>
+
+    <!-- <div id="options">
+      <span id="options--close"><b>x</b></span>
+      <p>Riso colours</p>
+      <div id="options--riso-colours">
+        <div><input type="checkbox" id="q83da0nfy9k" /><label for="q83da0nfy9k">black</label></div>
+        <div><input type="checkbox" id="q2a6q1sdwzp" /><label for="q2a6q1sdwzp">burgundy</label></div>
+        <div><input type="checkbox" id="l688edrzsxk" /><label for="l688edrzsxk">blue</label></div>
+        <div><input type="checkbox" id="vpwa7n3507" /><label for="vpwa7n3507">green</label></div>
+        <div><input type="checkbox" id="fizzndneo9r" /><label for="fizzndneo9r">mediumblue</label></div>
+        <div><input type="checkbox" id="y85qm7p4kt" /><label for="y85qm7p4kt">brightred</label></div>
+        <div><input type="checkbox" id="ahkprnx5yl7" /><label for="ahkprnx5yl7">risofederalblue</label></div>
+        <div><input type="checkbox" id="4nzxxh322q5" /><label for="4nzxxh322q5">purple</label></div>
+        <div><input type="checkbox" id="b1d010yvatc" /><label for="b1d010yvatc">teal</label></div>
+        <div><input type="checkbox" id="ql1t7uxc9u9" /><label for="ql1t7uxc9u9">flatgold</label></div>
+        <div><input type="checkbox" id="gdejyih9qr5" /><label for="gdejyih9qr5">huntergreen</label></div>
+        <div><input type="checkbox" id="funne1jue0e" /><label for="funne1jue0e">red</label></div>
+        <div><input type="checkbox" id="xr45l0tf4z" /><label for="xr45l0tf4z">brown</label></div>
+        <div><input type="checkbox" id="ne0cgvqci4" /><label for="ne0cgvqci4">yellow</label></div>
+        <div><input type="checkbox" id="tyg5mnr9yf" /><label for="tyg5mnr9yf">marinered</label></div>
+        <div><input type="checkbox" id="rlstt6bf79n" /><label for="rlstt6bf79n">orange</label></div>
+        <div><input type="checkbox" id="a6ux1jqxjue" /><label for="a6ux1jqxjue">fluorescentpink</label></div>
+        <div><input type="checkbox" id="8rltd8fbyi3" /><label for="8rltd8fbyi3">lightgray</label></div>
+        <div><input type="checkbox" id="zo4pv4uijjh" /><label for="zo4pv4uijjh">metallicgold</label></div>
+        <div><input type="checkbox" id="khdqu0z7ux" /><label for="khdqu0z7ux">crimson</label></div>
+        <div><input type="checkbox" id="msv1ip98qxd" /><label for="msv1ip98qxd">fluorescentorange</label></div>
+        <div><input type="checkbox" id="e16hvp88jtb" /><label for="e16hvp88jtb">cornflower</label></div>
+        <div><input type="checkbox" id="z51vp4kgm0f" /><label for="z51vp4kgm0f">skyblue</label></div>
+        <div><input type="checkbox" id="d86dhe45e18" /><label for="d86dhe45e18">seablue</label></div>
+        <div><input type="checkbox" id="yv9y4zj1tvj" /><label for="yv9y4zj1tvj">lake</label></div>
+        <div><input type="checkbox" id="ecwiaqv4b1h" /><label for="ecwiaqv4b1h">indigo</label></div>
+        <div><input type="checkbox" id="8y1gq3mzv7w" /><label for="8y1gq3mzv7w">midnight</label></div>
+        <div><input type="checkbox" id="pmfqj93cu38" /><label for="pmfqj93cu38">mist</label></div>
+        <div><input type="checkbox" id="e1qrgwoqwh8" /><label for="e1qrgwoqwh8">granite</label></div>
+        <div><input type="checkbox" id="l617gkt12vi" /><label for="l617gkt12vi">charcoal</label></div>
+        <div><input type="checkbox" id="91otmhex7ds" /><label for="91otmhex7ds">smokyteal</label></div>
+        <div><input type="checkbox" id="sawpk5q2sjg" /><label for="sawpk5q2sjg">steel</label></div>
+        <div><input type="checkbox" id="acf53pgn9c" /><label for="acf53pgn9c">slate</label></div>
+        <div><input type="checkbox" id="6z9f9ws4h1f" /><label for="6z9f9ws4h1f">turquoise</label></div>
+        <div><input type="checkbox" id="j3uv1r32rs7" /><label for="j3uv1r32rs7">emerald</label></div>
+        <div><input type="checkbox" id="bxh7bk4dzzs" /><label for="bxh7bk4dzzs">grass</label></div>
+        <div><input type="checkbox" id="qe5q0jgvilo" /><label for="qe5q0jgvilo">forest</label></div>
+        <div><input type="checkbox" id="61o6endt78" /><label for="61o6endt78">spruce</label></div>
+        <div><input type="checkbox" id="73khkcmstac" /><label for="73khkcmstac">moss</label></div>
+        <div><input type="checkbox" id="62p42lj7oi3" /><label for="62p42lj7oi3">seafoam</label></div>
+        <div><input type="checkbox" id="zldfeyraxlr" /><label for="zldfeyraxlr">kellygreen</label></div>
+        <div><input type="checkbox" id="ulycl5jcc3" /><label for="ulycl5jcc3">lightteal</label></div>
+        <div><input type="checkbox" id="ts49duqv7ic" /><label for="ts49duqv7ic">ivy</label></div>
+        <div><input type="checkbox" id="6pty3qxug8" /><label for="6pty3qxug8">pine</label></div>
+        <div><input type="checkbox" id="jpb0jwtuu1" /><label for="jpb0jwtuu1">lagoon</label></div>
+        <div><input type="checkbox" id="cedgyvq84jo" /><label for="cedgyvq84jo">violet</label></div>
+        <div><input type="checkbox" id="ukvjr3ael4b" /><label for="ukvjr3ael4b">orchid</label></div>
+        <div><input type="checkbox" id="yzfu08avo6p" /><label for="yzfu08avo6p">plum</label></div>
+        <div><input type="checkbox" id="9ow5oanu3li" /><label for="9ow5oanu3li">raisin</label></div>
+        <div><input type="checkbox" id="j8qp71nbtmg" /><label for="j8qp71nbtmg">grape</label></div>
+        <div><input type="checkbox" id="tssowrcgf9" /><label for="tssowrcgf9">scarlet</label></div>
+        <div><input type="checkbox" id="a4qn6p8xh96" /><label for="a4qn6p8xh96">tomato</label></div>
+        <div><input type="checkbox" id="ndg7jmlc2s" /><label for="ndg7jmlc2s">cranberry</label></div>
+        <div><input type="checkbox" id="0h180l1hdt2t" /><label for="0h180l1hdt2t">maroon</label></div>
+        <div><input type="checkbox" id="hgiivqx5zcc" /><label for="hgiivqx5zcc">raspberryred</label></div>
+        <div><input type="checkbox" id="vjmgpl9tssd" /><label for="vjmgpl9tssd">brick</label></div>
+        <div><input type="checkbox" id="26mqmv4nfffh" /><label for="26mqmv4nfffh">lightlime</label></div>
+        <div><input type="checkbox" id="v5uk3nqpmao" /><label for="v5uk3nqpmao">sunflower</label></div>
+        <div><input type="checkbox" id="btvep3951ks" /><label for="btvep3951ks">melon</label></div>
+        <div><input type="checkbox" id="0tqmwvsfczva" /><label for="0tqmwvsfczva">apricot</label></div>
+        <div><input type="checkbox" id="sm64754y2al" /><label for="sm64754y2al">paprika</label></div>
+        <div><input type="checkbox" id="3gqio6l77ns" /><label for="3gqio6l77ns">pumpkin</label></div>
+        <div><input type="checkbox" id="emxetcx4eu" /><label for="emxetcx4eu">brightolivegreen</label></div>
+        <div><input type="checkbox" id="62tgin5fagw" /><label for="62tgin5fagw">brightgold</label></div>
+        <div><input type="checkbox" id="uuxsulewevm" /><label for="uuxsulewevm">copper</label></div>
+        <div><input type="checkbox" id="9o5xfzvviae" /><label for="9o5xfzvviae">mahogany</label></div>
+        <div><input type="checkbox" id="mi464mfrnp9" /><label for="mi464mfrnp9">bisque</label></div>
+        <div><input type="checkbox" id="hlnnqmj5bqg" /><label for="hlnnqmj5bqg">bubblegum</label></div>
+        <div><input type="checkbox" id="1cvmeyxcn73" /><label for="1cvmeyxcn73">lightmauve</label></div>
+        <div><input type="checkbox" id="2wlw2wh40vi" /><label for="2wlw2wh40vi">darkmauve</label></div>
+        <div><input type="checkbox" id="wmk456yq7i" /><label for="wmk456yq7i">wine</label></div>
+        <div><input type="checkbox" id="pdn4pqgfkd" /><label for="pdn4pqgfkd">gray</label></div>
+        <div><input type="checkbox" id="33y7bqmey0a" /><label for="33y7bqmey0a">coral</label></div>
+        <div><input type="checkbox" id="8sz7pcfxo6q" /><label for="8sz7pcfxo6q">white</label></div>
+        <div><input type="checkbox" id="qczsf0tjy1l" /><label for="qczsf0tjy1l">aqua</label></div>
+        <div><input type="checkbox" id="p6mjsmi3v6h" /><label for="p6mjsmi3v6h">mint</label></div>
+        <div><input type="checkbox" id="mw79ah9kjnq" /><label for="mw79ah9kjnq">clearmedium</label></div>
+        <div><input type="checkbox" id="7chbju3kpi" /><label for="7chbju3kpi">fluorescentyellow</label></div>
+        <div><input type="checkbox" id="j2ireft9g" /><label for="j2ireft9g">fluorescentred</label></div>
+        <div><input type="checkbox" id="hu7auwkj5i" /><label for="hu7auwkj5i">fluorescentgreen</label></div>
+      </div>
+    </div> -->
+
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
     <!-- <script language="javascript" type="text/javascript" src="/js/p5.js"></script> -->
     <script type="text/javascript" src="/js/p5.riso.js"></script>
     <script type="text/javascript" src="/js/sketch.js"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function(event) {
+
+        let options = document.getElementById("options");
+        let showOptions = document.getElementById("showOptions");
+        let hideOptions = document.getElementById("hideOptions");
+
+        function toggleOptions(action) {
+          if (action === 'hideOptions') {
+            options.style.visibility = 'hidden';
+            showOptions.style.visibility = 'visible';
+          } else {  
+            options.style.visibility = 'visible';
+            showOptions.style.visibility = 'hidden';
+          }
+        }
+
+        showOptions.addEventListener("click", function() {
+          toggleOptions(this.id)
+        }, false);
+
+        hideOptions.addEventListener("click", function() {
+            toggleOptions(this.id)
+        }, false);
+
+      })
+    </script>
   </body>
 </html>

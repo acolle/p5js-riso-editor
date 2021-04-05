@@ -12,6 +12,10 @@ server.get('/', (req, res) => {
   res.sendFile(path.join(__dirname + '/public/html/index.html'));
 })
 
+server.get('/dither', (req, res) => {
+  res.sendFile(path.join(__dirname + '/public/html/dither.html'));
+})
+
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
   console.log(`Listening on port ${port}`);

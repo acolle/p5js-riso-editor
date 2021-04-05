@@ -1,110 +1,65 @@
-const risoColours_ = [
-  'BLACK',
-  'BURGUNDY',
-  'BLUE',
-  'GREEN',
-  'MEDIUMBLUE',
-  'BRIGHTRED',
-  'RISOFEDERALBLUE',
-  'PURPLE',
-  'TEAL',
-  'FLATGOLD',
-  'HUNTERGREEN',
-  'RED',
-  'BROWN',
-  'YELLOW',
-  'MARINERED',
-  'ORANGE',
-  'FLUORESCENTPINK',
-  'LIGHTGRAY',
-  'METALLICGOLD',
-  'CRIMSON',
-  'FLUORESCENTORANGE',
-  'CORNFLOWER',
-  'SKYBLUE',
-  'SEABLUE',
-  'LAKE',
-  'INDIGO',
-  'MIDNIGHT',
-  'MIST',
-  'GRANITE',
-  'CHARCOAL',
-  'SMOKYTEAL',
-  'STEEL',
-  'SLATE',
-  'TURQUOISE',
-  'EMERALD',
-  'GRASS',
-  'FOREST',
-  'SPRUCE',
-  'MOSS',
-  'SEAFOAM',
-  'KELLYGREEN',
-  'LIGHTTEAL',
-  'IVY',
-  'PINE',
-  'LAGOON',
-  'VIOLET',
-  'ORCHID',
-  'PLUM',
-  'RAISIN',
-  'GRAPE',
-  'SCARLET',
-  'TOMATO',
-  'CRANBERRY',
-  'MAROON',
-  'RASPBERRYRED',
-  'BRICK',
-  'LIGHTLIME',
-  'SUNFLOWER',
-  'MELON',
-  'APRICOT',
-  'PAPRIKA',
-  'PUMPKIN',
-  'BRIGHTOLIVEGREEN',
-  'BRIGHTGOLD',
-  'COPPER',
-  'MAHOGANY',
-  'BISQUE',
-  'BUBBLEGUM',
-  'LIGHTMAUVE',
-  'DARKMAUVE',
-  'WINE',
-  'GRAY',
-  'CORAL',
-  'WHITE',
-  'AQUA',
-  'MINT',
-  'CLEARMEDIUM',
-  'FLUORESCENTYELLOW',
-  'FLUORESCENTRED',
-  'FLUORESCENTGREEN'
-]
+let ctx;
 
 let img;
 let imgRatio;
 let imgWidth;
 let imgHeight;
-let ctx;
+
 let risoColours;
 let risoObjects;
 let risoLayersSelected = [];
 let risoMode = false;
+let ditherType = 'atkinson';
 
-//
-let blue, red;
+const CURATEDRISOPALETTES = [
+  { palette: 'comics', colours: [
+    { name: 'BLUE', colour_hex: '#0078bf', colour_arr: [0, 120, 191]},
+    { name: 'BUBBLEGUM', colour_hex: '#f984ca', colour_arr: [249, 132, 202]},
+    { name: 'YELLOW', colour_hex: '#ffe800', colour_arr: [255, 232, 0]}
+  ] },
+  { palette: 'azerty', colours: [
+    { name: 'AQUA', colour_hex: '#5ec8e5', colour_arr: [94, 200, 229]},
+    { name: 'BRIGHTRED', colour_hex: '#f15060', colour_arr: [241, 80, 96]}
+  ] },
+  { palette: 'valorant', colours: [
+    { name: 'MINT', colour_hex: '#82d8d5', colour_arr: [130, 216, 213]},
+    { name: 'YELLOW', colour_hex: '#ffe800', colour_arr: [255, 232, 0]},
+    { name: 'STEEL', colour_hex: '#375e77', colour_arr: [55, 94, 119]}
+  ] },
+  { palette: 'kingdom', colours: [
+    { name: 'MINT', colour_hex: '#82d8d5', colour_arr: [130, 216, 213]},
+    { name: 'FLUORESCENTORANGE', colour_hex: '#ff7477', colour_arr: [255, 116, 119]},
+    { name: 'STEEL', colour_hex: '#375e77', colour_arr: [55, 94, 119]}
+  ] }
+]
+
+// Randomise overlay of layers
+let randomPosX = true;
+let randomPosXMin = -10;
+let randomPosXMax = 10;
+let randomPosY = true;
+let randomPosYMin = -10;
+let randomPosYMax = 10;
 
 function preload() {
-
-  img = loadImage('/img/picasso_copy.jpg'); // test portrait
+  // img = loadImage('/img/picasso_copy.jpg');
   // img = loadImage('https://uploads4.wikiart.org/images/pablo-picasso/a-muse-1935.jpg'); // test landscape
-  // img = loadImage('https://64.media.tumblr.com/ed593c97761ec4b4f3a7530aa6feb332/tumblr_o2huotdmcU1utardvo1_500.jpg'); // test smaller than canvas
-  // img = loadImage('https://64.media.tumblr.com/b48a167e61792906739a7aa57f56e285/098e9abddf2179ec-a1/s500x750/c1f4ca69b90d44fc99c084bf3509352437096ced.jpg'); //NSFW
+  // img = loadImage('/img/picasso_stravinsky.jpg');
+  // img = loadImage('/img/skull.jpg');
+  img = loadImage('img/rosa.jpg');
+  // img = loadImage('/img/gradient.png');
+  // THP - page 79 included no polaroid format
+  // img = loadImage('/img/lips.jpg');
+  // img = loadImage('/img/squat.jpg');
 }
 
-function setup_() {
+function setup() {
+  // Separate actions in another function to allow reset canvas without refresh
+  reset();
+}
+
+function reset() {
   // create canvas
-  // ctx = createCanvas(8.5 * 72, 11 * 72);
   ctx = createCanvas(windowWidth * 0.9, windowHeight * 0.9);
   ctx.parent("canvas");
 
@@ -114,37 +69,47 @@ function setup_() {
   imgWidth = imgRatio > 1 ? ctx.width : (img.width * (ctx.height / img.height));
   imgHeight = imgRatio > 1 ? (img.height * (ctx.width / img.width)) : ctx.height;
 
-  // Get all riso colours
-  // risoColours = selectAll('.riso-color');
-  // for (let i = 0; i < risoColours.length; i++) {
-  //   // Add eventListener on riso colours of the selection list
-  //   selectAll(`.riso-${risoColours[i].elt.innerHTML}`)[0].mouseClicked(selectUnselectColour);
-  // }
+  // Get all riso elements from the DOM
+  risoColours = selectAll('.riso-colour');
+  // Add
+  addRisoSelection(risoColours);
+  addRisoSuggestion(risoColours, CURATEDRISOPALETTES);
 
-  risoObjects = createRisoObjects(risoColours_);
-  addColourOptions();
+  // Create array of Riso colour names
+  risoColours = risoColours.map(colour => colour.elt.innerHTML);
+
+  for (let i = 0; i < risoColours.length; i++) {
+    // Add eventListener on riso colours of the selection list
+    selectAll(`.riso-${risoColours[i]}`)[1].mouseClicked(selectUnselectColour);
+  }
+
+  // Create all Riso objects
+  risoObjects = createRisoObjects(risoColours);
 
   pixelDensity(1);
-  // noLoop();
+  noLoop();
 }
 
-function draw_() {
+function draw() {
 
   background(248, 248, 255);
 
   if (risoMode) {
-
     // reset imageMode
     imageMode(CORNER);
 
     clearRiso();
 
+    // let dithered_1 = ditherImage(img, 'none', 255);
+    // let dithered_2 = ditherImage(img, 'none', 120);
+    // let dithered_3 = ditherImage(img, 'none', 60);
+
     for (let i = 0; i < risoLayersSelected.length; i++) {
       if (risoLayersSelected[i]) {
+        //
         let risoLayer = risoObjects[risoColours[i]];
-        // let extractedColour = extractRGBChannel(img, `${colour}`);
         risoLayer.imageMode(CENTER);
-        let slider = select(`#${risoColours[i]}_slider`);
+        let slider = select(`#${risoColours[i]}_fill_slider`);
         risoLayer.fill(slider.value());
         if (imgRatio > 1 ? img.width > ctx.width : img.height > ctx.height) {
           risoLayer.image(
@@ -189,139 +154,115 @@ function draw_() {
 
 }
 
-function setup() {
-  ctx = createCanvas(windowWidth * 0.9, windowHeight * 0.9);
-  // get image ratio: > 1 if portrait; < 1 if landscape
-  imgRatio = img.width / img.weight;
-  // depending on ratio, scale down width or height of the image
-  imgWidth = imgRatio > 1 ? ctx.width : (img.width * (ctx.height / img.height));
-  imgHeight = imgRatio > 1 ? (img.height * (ctx.width / img.width)) : ctx.height;
-
-  blue = new Riso('blue');
-  red = new Riso('red');
-  pixelDensity(1);
-  noLoop();
-}
-
-function draw() {
-  background(248, 248, 255);
-
-  clearRiso();
-
-  let reds = extractRGBChannel(img, "red");
-  let blues = extractRGBChannel(img, "blue");
-  // let reds = extractCMYKChannel(img, "cyan"); //extract cyan from img
-  // let blues = extractCMYKChannel(img, "magenta"); //extract magenta from img
-
-  blue.imageMode(CENTER);
-  red.imageMode(CENTER);
-
-  // blue.image(blues, width / 2, height / 2, img.width / 2, img.height / 2);
-  // red.image(reds, width / 2, height / 2, img.width / 2, img.height / 2);
-
-  if (imgRatio > 1 ? img.width > ctx.width : img.height > ctx.height) {
-    blue.image(
-      blues,
-      ctx.width / 2,
-      ctx.height / 2,
-      imgWidth,
-      imgHeight
-    );
-    red.image(
-      reds,
-      ctx.width / 2,
-      ctx.height / 2,
-      imgWidth,
-      imgHeight
-    );
-  } else {
-    blue.image(
-      blues,
-      ctx.width / 2,
-      ctx.height / 2,
-      img.width,
-      img.height
-    );
-    red.image(
-      reds,
-      ctx.width / 2,
-      ctx.height / 2,
-      img.width,
-      img.height
-    );
-  }
-
-
-  let textGraphic = createGraphics(width, height);
-  textGraphic.fill(0);
-  textGraphic.textStyle(BOLD);
-  textGraphic.textFont('Helvetica');
-  textGraphic.textAlign(CENTER, CENTER);
-  textGraphic.textSize(60);
-  textGraphic.text('SQUAT', width * 0.54, height * 0.63);
-  // textGraphic.text('ABOLISH', width * 0.5, height * 0.7);
-  // textGraphic.text('ART', width * 0.5, height * 0.8);
-
-  blue.cutout(textGraphic);
-
-  drawRiso();
+function draw_() {
+  // RGB/CNYK Channels & Dither serve as the masters
+  // RGB channels
+  let red_c = extractRGBChannel(img, "red");
+  let green_c = extractRGBChannel(img, "green");
+  let blue_c = extractRGBChannel(img, "blue");
+  // CMYK channels
+  let cyan_c = extractCMYKChannel(img, "cyan");
+  let magenta_c = extractCMYKChannel(img, "magenta");
+  let yellow_c = extractCMYKChannel(img, "yellow");
+  let black_c = extractCMYKChannel(img, "black");
+  // dither image before applying riso layers - atkinson, floydsteinberg, bayer, none
+  // dark/cool colours -> low threshold on img + RGB channels
+  // warm/highlight colours -> low threshold on img + RGB channels
+  // start with highlights -> all background
+  // add darker and darker layers on top
+  // cut if necessary
+  let dithered_1 = ditherImage(img, 'none', 255);
+  let dithered_2 = ditherImage(img, 'none', 120);
+  let dithered_3 = ditherImage(img, 'none', 60);
 }
 
 
-function addColourOptions() {
+function addRisoSelection(risoElements) {
 
-  // console.log(risoColours[0].elt.style.backgroundColor);
-
-  for (let i = 0; i < risoColours.length; i++) {
-
-    let container = createDiv();
-    container.class(`riso-color--container`);
-    container.id(`riso-${risoColours[i].elt.innerHTML}--container`);
-
+  for (let i = 0; i < risoElements.length; i++) {
     // Create all selected riso colours
-    let risoColour = createSpan(risoColours[i].elt.innerHTML);
-    risoColour.class(`riso-color riso-${risoColours[i].elt.innerHTML}`);
-    risoColour.style('background-color', risoColours[i].elt.style.backgroundColor);
-    risoColour.style('margin', 'auto');
-    risoColour.html(`${risoColours[i].elt.innerHTML}`);
+    let risoColour = createSpan(risoElements[i].elt.innerHTML);
+    risoColour.id(`riso-${risoElements[i].elt.innerHTML}--element`);
+    risoColour.class(`riso-colour riso-${risoElements[i].elt.innerHTML}`);
+    risoColour.style('background-color', risoElements[i].elt.style.backgroundColor);
+    risoColour.style('display', 'none');
+    risoColour.html(`${risoElements[i].elt.innerHTML}`);
     risoColour.mouseClicked(selectUnselectColour);
-    risoColour.parent(container);
+    risoColour.parent('selected-colours');
 
     // Create sliders
-    let slider = createSlider(0, 255, 128, 1);
-    slider.id(`${risoColours[i].elt.innerHTML}_fill_slider`);
-    slider.parent(container);
+    // let slider = createSlider(0, 255, 128, 1);
+    // slider.id(`${risoElements[i].elt.innerHTML}_fill_slider`);
+    // slider.parent(container);
 
     // TODO: Add other sliders and options
 
-    // Append riso colour container to the menu div
-    container.style('display', 'none');
-    container.parent('riso-colours--options');
-
   }
+
+  // TODO: Add instructions when no colours are selected
+
+}
+
+function addRisoSuggestion(allRisoColours, curatedRisoColours) {
+
+  for (let i = 0; i < curatedRisoColours.length; i++) {
+
+    let palette = createDiv(`${curatedRisoColours[i].palette}: `);
+
+    for (let j = 0; j < curatedRisoColours[i].colours.length; j++) {
+      // Create all curated riso colours in the palette
+      let risoColour = createSpan(`${curatedRisoColours[i].colours[j].name.toLowerCase()}`);
+      // risoColour.id(`riso-${risoElements[i].elt.innerHTML}--element`);
+      risoColour.class(`riso-colour riso-${curatedRisoColours[i].colours[j].name}--alt`);
+      risoColour.style('background-color', `${curatedRisoColours[i].colours[j].colour_hex}`);
+      risoColour.style('cursor', 'auto');
+      risoColour.parent(palette);
+    }
+    palette.mouseClicked(function() {
+      selectPalette(curatedRisoColours[i].colours);
+    });
+    palette.style('cursor', 'pointer');
+    palette.style('border', '1px solid blue');
+    palette.parent('recommended-colours');
+  }
+
 }
 
 function selectUnselectColour() {
-
-  let risoContainer = select(`#riso-${this.elt.innerHTML}--container`);
+  let risoContainer = select(`#riso-${this.elt.innerHTML}--element`);
   if (risoContainer.elt.style.display === 'none') {
-    risoContainer.style('display', 'flex')
+    risoMode = true;
+    risoContainer.style('display', 'inline');
+    risoLayersSelected[risoColours.indexOf(this.elt.innerHTML.toUpperCase())] = true;
   } else {
-    risoContainer.style('display', 'none')
+    risoContainer.style('display', 'none');
+    risoLayersSelected[risoColours.indexOf(this.elt.innerHTML.toUpperCase())] = false;
   }
 
-  // if (this.checked()){
-  //   risoMode = true;
-  //   risoLayersSelected[risoColours.indexOf(this.value().toUpperCase())] = true;
-  // } else {
-  //   risoLayersSelected[risoColours.indexOf(this.value().toUpperCase())] = false;
-  // }
-  //
-  // // Check if all unselected to disable risoMode
-  // if (!risoLayersSelected.includes(true)) {
-  //   risoMode = false;
-  // }
+  // Enable Riso mode if at least one colour has been selected
+  if (risoLayersSelected.includes(true)) {
+    // select(`#selected-colours`).html('');
+    risoMode = true;
+  } else {
+    risoMode = false;
+  }
+}
 
+function selectPalette(palette) {
+  // Hide all selected colours
+  let selectedColours = select(`#selected-colours`);
+  palette = palette.map(colour => colour.name);
+
+  for (let i = 0; i < selectedColours.elt.childNodes.length; i++) {
+    let colour = selectedColours.elt.childNodes[i];
+    if (palette.includes(colour.innerHTML)) {
+      colour.style.display = 'inline';
+      risoLayersSelected[risoColours.indexOf(colour.innerHTML.toUpperCase())] = true;
+    } else {
+      colour.style.display = 'none';
+      risoLayersSelected[risoColours.indexOf(colour.innerHTML.toUpperCase())] = false;
+    }
+  }
 }
 
 function createRisoObjects(colours) {
@@ -339,9 +280,22 @@ function createRisoObjects(colours) {
 }
 
 function getRandomIntInclusive(min, max) {
+  // both min and max are inclusive
   min = Math.ceil(min);
   max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+// Change dither type
+// function keyReleased() {
+//   if (key == 1) ditherType = 'atkinson';
+//   else if (key == 2) ditherType = 'floydsteinberg';
+//   else if (key == 3) ditherType = 'bayer';
+//   else if (key == 4) ditherType = 'none';
+// }
+
+function debug() {
+  console.log(risoObjects);
 }
 
 // Handle keyboard events
@@ -349,6 +303,12 @@ function keyPressed() {
   switch(key) {
     case 's':
       exportRiso();
+      break;
+    case 'd':
+      debug();
+      break;
+    case 'r':
+      reset();
       break;
     default:
       break;

@@ -6,6 +6,7 @@ let imgWidth;
 let imgHeight;
 
 let risoColours;
+let risoColoursNames;
 let risoObjects;
 let risoLayersSelected = [];
 let risoMode = false;
@@ -51,10 +52,11 @@ function preload() {
   // THP - page 79 included no polaroid format
   // img = loadImage('/img/lips.jpg');
   // img = loadImage('/img/squat.jpg');
+  // img = loadImage('img/temp.webp');
 }
 
 function setup() {
-  // Separate actions in another function to allow reset canvas without refresh
+  //
   reset();
 }
 
@@ -71,20 +73,23 @@ function reset() {
 
   // Get all riso elements from the DOM
   risoColours = selectAll('.riso-colour');
-  // Add
-  addRisoSelection(risoColours);
-  addRisoSuggestion(risoColours, CURATEDRISOPALETTES);
-
   // Create array of Riso colour names
-  risoColours = risoColours.map(colour => colour.elt.innerHTML);
+  risoColoursNames = risoColours.map(colour => colour.elt.innerHTML);
 
-  for (let i = 0; i < risoColours.length; i++) {
+  // Add Riso selection
+  addRisoSelection(risoColours);
+  // Add Riso palettes suggestions
+  addRisoSuggestion(risoColours, CURATEDRISOPALETTES);
+  // Add customisation options for each Riso layer
+  addRisoLayerOptions(risoColours);
+
+  for (let i = 0; i < risoColoursNames.length; i++) {
     // Add eventListener on riso colours of the selection list
-    selectAll(`.riso-${risoColours[i]}`)[1].mouseClicked(selectUnselectColour);
+    selectAll(`.riso-${risoColoursNames[i]}`)[1].mouseClicked(selectUnselectColour);
   }
 
   // Create all Riso objects
-  risoObjects = createRisoObjects(risoColours);
+  risoObjects = createRisoObjects(risoColoursNames);
 
   pixelDensity(1);
   noLoop();
@@ -107,23 +112,30 @@ function draw() {
     for (let i = 0; i < risoLayersSelected.length; i++) {
       if (risoLayersSelected[i]) {
         //
-        let risoLayer = risoObjects[risoColours[i]];
+        let risoLayer = risoObjects[risoColoursNames[i]];
         risoLayer.imageMode(CENTER);
-        let slider = select(`#${risoColours[i]}_fill_slider`);
-        risoLayer.fill(slider.value());
+
+        // Get all options
+        let fillSlider = select(`#${risoColoursNames[i]}_fill_slider`);
+        risoLayer.fill(fillSlider.value());
+
+        let positionXSlider = select(`#${risoColoursNames[i]}_posX_slider`);
+        let positionYSlider = select(`#${risoColoursNames[i]}_posY_slider`);
+
+        // Draw the Riso
         if (imgRatio > 1 ? img.width > ctx.width : img.height > ctx.height) {
           risoLayer.image(
             img,
-            ctx.width / 2,
-            ctx.height / 2,
+            positionXSlider.value(),
+            positionYSlider.value(),
             imgWidth,
             imgHeight
           );
         } else {
           risoLayer.image(
             img,
-            ctx.width / 2,
-            ctx.height / 2,
+            positionXSlider.value(),
+            positionYSlider.value(),
             img.width,
             img.height
           );
@@ -176,7 +188,6 @@ function draw_() {
   let dithered_3 = ditherImage(img, 'none', 60);
 }
 
-
 function addRisoSelection(risoElements) {
 
   for (let i = 0; i < risoElements.length; i++) {
@@ -189,25 +200,15 @@ function addRisoSelection(risoElements) {
     risoColour.html(`${risoElements[i].elt.innerHTML}`);
     risoColour.mouseClicked(selectUnselectColour);
     risoColour.parent('selected-colours');
-
-    // Create sliders
-    // let slider = createSlider(0, 255, 128, 1);
-    // slider.id(`${risoElements[i].elt.innerHTML}_fill_slider`);
-    // slider.parent(container);
-
-    // TODO: Add other sliders and options
-
   }
-
   // TODO: Add instructions when no colours are selected
-
 }
 
 function addRisoSuggestion(allRisoColours, curatedRisoColours) {
 
   for (let i = 0; i < curatedRisoColours.length; i++) {
 
-    let palette = createDiv(`${curatedRisoColours[i].palette}: `);
+    let palette = createDiv(`${curatedRisoColours[i].palette} `);
 
     for (let j = 0; j < curatedRisoColours[i].colours.length; j++) {
       // Create all curated riso colours in the palette
@@ -215,33 +216,165 @@ function addRisoSuggestion(allRisoColours, curatedRisoColours) {
       // risoColour.id(`riso-${risoElements[i].elt.innerHTML}--element`);
       risoColour.class(`riso-colour riso-${curatedRisoColours[i].colours[j].name}--alt`);
       risoColour.style('background-color', `${curatedRisoColours[i].colours[j].colour_hex}`);
-      risoColour.style('cursor', 'auto');
       risoColour.parent(palette);
     }
     palette.mouseClicked(function() {
       selectPalette(curatedRisoColours[i].colours);
     });
     palette.style('cursor', 'pointer');
-    palette.style('border', '1px solid blue');
     palette.parent('recommended-colours');
   }
 
 }
 
-function selectUnselectColour() {
-  let risoContainer = select(`#riso-${this.elt.innerHTML}--element`);
-  if (risoContainer.elt.style.display === 'none') {
-    risoMode = true;
-    risoContainer.style('display', 'inline');
-    risoLayersSelected[risoColours.indexOf(this.elt.innerHTML.toUpperCase())] = true;
+function addRisoLayerOptions(risoElements) {
+
+  let ctxWidth = Math.round(ctx.width);
+  let ctxHeight = Math.round(ctx.height);
+  let ctxWidthHalf = Math.round(ctxWidth / 2);
+  let ctxHeightHalf = Math.round(ctxHeight / 2);
+
+  let allOptionsContainer = createDiv();
+  allOptionsContainer.id('options--customisation-container');
+
+  for (let i = 0; i < risoElements.length; i++) {
+
+    let container = createDiv();
+    container.id(`riso-${risoElements[i].elt.innerHTML}--options-container`);
+    container.style('padding', '4px 0');
+
+    let risoColour = createSpan(risoElements[i].elt.innerHTML);
+    risoColour.id(`riso-${risoElements[i].elt.innerHTML}--options`);
+    risoColour.class(`riso-colour riso-${risoElements[i].elt.innerHTML} riso--options`);
+    risoColour.style('background-color', risoElements[i].elt.style.backgroundColor);
+    risoColour.style('display', 'block');
+    risoColour.style('textAlign', 'center');
+    risoColour.html(`${risoElements[i].elt.innerHTML}`);
+    risoColour.parent(container);
+
+    // Add options
+    let optionsContainer = createDiv();
+    optionsContainer.style('padding', '8px');
+
+    // Fill / Opacity
+    let fillSliderContainer = createSpan('Fill (0 to 255)');
+    let fillSliderValue = createSpan('128');
+    fillSliderValue.id(`${risoElements[i].elt.innerHTML}_fill_slider_value`);
+    fillSliderValue.style('float', 'right');
+    fillSliderValue.parent(fillSliderContainer);
+    let fillSlider = createSlider(0, 255, 128, 1);
+    fillSlider.id(`${risoElements[i].elt.innerHTML}_fill_slider`);
+    fillSlider.style('width', '100%');
+    fillSlider.input(showInputValue);
+    fillSlider.parent(fillSliderContainer);
+
+    fillSliderContainer.parent(optionsContainer);
+
+    // Layer X position
+    let positionXContainer = createSpan(`Pos. x (0 to ${ctxWidth})`);
+    let positionXValue = createSpan(`${ctxWidthHalf}`);
+    positionXValue.id(`${risoElements[i].elt.innerHTML}_posX_slider_value`);
+    positionXValue.style('float', 'right');
+    positionXValue.parent(positionXContainer);
+    let positionXSlider = createSlider(0, ctxWidth, ctxWidthHalf, 1);
+    positionXSlider.id(`${risoElements[i].elt.innerHTML}_posX_slider`);
+    positionXSlider.style('width', '100%');
+    positionXSlider.input(showInputValue);
+    positionXSlider.parent(positionXContainer);
+
+    positionXContainer.parent(optionsContainer);
+
+    // Layer Y position
+    let positionYContainer = createSpan(`Pos. y (0 to ${ctxHeight})`);
+    let positionYValue = createSpan(`${ctxHeightHalf}`);
+    positionYValue.id(`${risoElements[i].elt.innerHTML}_posY_slider_value`);
+    positionYValue.style('float', 'right');
+    positionYValue.parent(positionYContainer);
+    let positionYSlider = createSlider(0, ctxHeight, ctxHeightHalf, 1);
+    positionYSlider.id(`${risoElements[i].elt.innerHTML}_posY_slider`);
+    positionYSlider.style('width', '100%');
+    positionYSlider.input(showInputValue);
+    positionYSlider.parent(positionYContainer);
+
+    positionYContainer.parent(optionsContainer);
+
+    // Add dithering selector
+    let ditheringContainer = createSpan('Dithering');
+    let ditheringSelector = createSelect();
+    ditheringSelector.id(`${risoElements[i].elt.innerHTML}_dithering_selector`);
+    ditheringSelector.style('width', '100%');
+    ditheringSelector.option('image');
+    ditheringSelector.option('atkinson');
+    ditheringSelector.option('floydsteinberg');
+    ditheringSelector.option('bayer');
+    ditheringSelector.option('none');
+    ditheringSelector.selected('image');
+    ditheringSelector.changed(handleDitheringChange);
+    ditheringSelector.parent(ditheringContainer);
+
+    let ditheringThresholdContainer = createSpan('Threshold (0 to 255)');
+    ditheringThresholdContainer.id(`${risoElements[i].elt.innerHTML}_dithering_threshold`);
+    let ditheringThresholdValue = createSpan('128');
+    ditheringThresholdValue.id(`${risoElements[i].elt.innerHTML}_dithering_threshold_value`);
+    ditheringThresholdValue.style('float', 'right');
+    ditheringThresholdValue.parent(ditheringThresholdContainer);
+
+    let ditheringThresholdSlider = createSlider(0, 255, 128, 1);
+    ditheringThresholdSlider.id(`${risoElements[i].elt.innerHTML}_dithering_threshold_slider`);
+    ditheringThresholdSlider.style('width', '100%');
+    ditheringThresholdSlider.input(showInputValue);
+    ditheringThresholdSlider.parent(ditheringThresholdContainer);
+
+    ditheringThresholdContainer.parent(ditheringContainer);
+    ditheringThresholdContainer.style('display', 'none');
+    ditheringContainer.parent(optionsContainer);
+
+    optionsContainer.parent(container);
+    container.style('display', 'none');
+    container.parent(allOptionsContainer);
+  }
+  allOptionsContainer.parent('options--customisation');
+}
+
+function showInputValue(event) {
+  // Update value of inputs
+  let value = event.target.value;
+  let feedbackElt = select(`#${event.target.id}_value`);
+  feedbackElt.elt.innerHTML = value;
+}
+
+function handleDitheringChange(event) {
+  let ditherType = event.target.value;
+  let ditheringOption = select(`#${event.target.id.split('_')[0]}_dithering_threshold`);
+
+  if (ditherType === 'bayer' || ditherType === 'none') {
+    ditheringOption.elt.style.display = 'block';
   } else {
-    risoContainer.style('display', 'none');
-    risoLayersSelected[risoColours.indexOf(this.elt.innerHTML.toUpperCase())] = false;
+    ditheringOption.elt.style.display = 'none';
+  }
+}
+
+function selectUnselectColour() {
+  // Unhide the Riso colour in the selection section
+  let selectedRiso = select(`#riso-${this.elt.innerHTML}--element`);
+
+  // Unhide the Riso colour in the customisation options section
+  let selectedRisoOptions = (`#riso-${this.elt.innerHTML}--options-container`);
+
+  if (selectedRiso.elt.style.display === 'none') {
+    risoMode = true;
+    selectedRiso.style('display', 'inline');
+    selectedRisoOptions.style('display', 'block');
+    // Update index of selected colour
+    risoLayersSelected[risoColoursNames.indexOf(this.elt.innerHTML.toUpperCase())] = true;
+  } else {
+    selectedRiso.style('display', 'none');
+    selectedRisoOptions.style('display', 'none');
+    risoLayersSelected[risoColoursNames.indexOf(this.elt.innerHTML.toUpperCase())] = false;
   }
 
   // Enable Riso mode if at least one colour has been selected
   if (risoLayersSelected.includes(true)) {
-    // select(`#selected-colours`).html('');
     risoMode = true;
   } else {
     risoMode = false;
@@ -249,18 +382,24 @@ function selectUnselectColour() {
 }
 
 function selectPalette(palette) {
-  // Hide all selected colours
-  let selectedColours = select(`#selected-colours`);
+  // Hide all selected colours/options and unhide only those in palette
+  let selectedColours = select('#selected-colours');
   palette = palette.map(colour => colour.name);
+  // Customisation options
+  let selectedRisoOptions = select('#options--customisation-container');
 
   for (let i = 0; i < selectedColours.elt.childNodes.length; i++) {
     let colour = selectedColours.elt.childNodes[i];
+    let colourOptions = selectedRisoOptions.elt.childNodes[i];
     if (palette.includes(colour.innerHTML)) {
+      risoMode = true;
       colour.style.display = 'inline';
-      risoLayersSelected[risoColours.indexOf(colour.innerHTML.toUpperCase())] = true;
+      colourOptions.style.display = 'block';
+      risoLayersSelected[risoColoursNames.indexOf(colour.innerHTML.toUpperCase())] = true;
     } else {
       colour.style.display = 'none';
-      risoLayersSelected[risoColours.indexOf(colour.innerHTML.toUpperCase())] = false;
+      colourOptions.style.display = 'none';
+      risoLayersSelected[risoColoursNames.indexOf(colour.innerHTML.toUpperCase())] = false;
     }
   }
 }
@@ -295,7 +434,12 @@ function getRandomIntInclusive(min, max) {
 // }
 
 function debug() {
-  console.log(risoObjects);
+  console.log(risoMode);
+}
+
+function refresh() {
+  // Rerun draw() function once to apply Riso selections
+  redraw();
 }
 
 // Handle keyboard events

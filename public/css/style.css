@@ -66,12 +66,8 @@ button:hover {
   justify-content: space-between; */
 }
 
-#riso-colours--options {
-
-}
-
-/* Open options icon */
-.gg-arrow-left-o {
+/* Option icons */
+.gg-arrow-left-o, .gg-close-o {
     box-sizing: border-box;
     position: relative;
     display: block;
@@ -79,7 +75,7 @@ button:hover {
     height: 22px;
     border: 2px solid #aadcff;
     transform: scale(var(--ggs,1));
-    border-radius: 22px;
+    border-radius: 40px;
     cursor: pointer;
 }
 .gg-arrow-left-o::after,
@@ -104,26 +100,6 @@ button:hover {
     bottom: 8px;
     background: #aadcff;
 }
-
-#showOptions {
-  visibility: hidden;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-/* Close icon */
-.gg-close-o {
-  box-sizing: border-box;
-  position: relative;
-  display: block;
-  transform: scale(var(--ggs,1));
-  width: 22px;
-  height: 22px;
-  border: 2px solid #aadcff;
-  border-radius: 40px;
-  cursor: pointer;
-}
 .gg-close-o::after,
 .gg-close-o::before {
   content: "";
@@ -142,6 +118,14 @@ button:hover {
   transform: rotate(-45deg)
 }
 
+
+#showOptions {
+  visibility: hidden;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
 .riso-colour {
   display: inline-block;
   font-size: .85em;
@@ -152,10 +136,27 @@ button:hover {
   cursor: pointer;
 }
 
+.riso--options {
+  font-size: 1.2em;
+  padding: 8px 2px;
+}
+
 .riso-WHITE, .riso-CLEARMEDIUM, .riso-YELLOW, .riso-LIGHTLIME {
   color: #000;
 }
 
 .riso-WHITE--alt, .riso-CLEARMEDIUM--alt, .riso-YELLOW--alt, .riso-LIGHTLIME--alt {
   color: #000;
+}
+
+input, select, textarea {
+  color: #424242;
+  display: block;
+  // margin: 10px 0 20px 0;
+  width: 100%;
+  padding: 8px 14px;
+  // box-shadow: rgba(50, 50, 93, 0.14902) 0px 1px 3px, rgba(0, 0, 0, 0.0196078) 0px 1px 0px;
+  border: 1px solid rgba(42, 42, 42, 0.5);
+  border-radius: 4px;
+  background-color: white;
 }

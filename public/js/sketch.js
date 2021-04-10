@@ -105,27 +105,33 @@ function draw() {
 
     clearRiso();
 
-    // let dithered_1 = ditherImage(img, 'none', 255);
-    // let dithered_2 = ditherImage(img, 'none', 120);
-    // let dithered_3 = ditherImage(img, 'none', 60);
+    for (let i = 0; i < risoObjects.length; i++) {
+      if (risoObjects[i].selected) {
 
-    for (let i = 0; i < risoLayersSelected.length; i++) {
-      if (risoLayersSelected[i]) {
+        let src = img;
+
         //
-        let risoLayer = risoObjects[risoColoursNames[i]];
+        let risoLayer = risoObjects[i].riso;
         risoLayer.imageMode(CENTER);
 
         // Get all options
-        let fillSlider = select(`#${risoColoursNames[i]}_fill_slider`);
+        let fillSlider = select(`#${risoObjects[i].name}_fill_slider`);
         risoLayer.fill(fillSlider.value());
 
-        let positionXSlider = select(`#${risoColoursNames[i]}_posX_slider`);
-        let positionYSlider = select(`#${risoColoursNames[i]}_posY_slider`);
+        let positionXSlider = select(`#${risoObjects[i].name}_posX_slider`);
+        let positionYSlider = select(`#${risoObjects[i].name}_posY_slider`);
+
+        let ditherType = select(`#${risoObjects[i].name}_dithering_selector`).value();
+        let threshold = select(`#${risoObjects[i].name}_dithering_threshold_slider`).value();
+
+        if (ditherType !== 'image') {
+          src = ditherImage(img, ditherType, threshold);
+        }
 
         // Draw the Riso
         if (imgRatio > 1 ? img.width > ctx.width : img.height > ctx.height) {
           risoLayer.image(
-            img,
+            src,
             positionXSlider.value(),
             positionYSlider.value(),
             imgWidth,
@@ -133,7 +139,7 @@ function draw() {
           );
         } else {
           risoLayer.image(
-            img,
+            src,
             positionXSlider.value(),
             positionYSlider.value(),
             img.width,
@@ -142,6 +148,9 @@ function draw() {
         }
       }
     }
+
+    // directly inside above loop?
+    // handleCutout();
 
     drawRiso();
 
@@ -166,13 +175,17 @@ function draw() {
 
 }
 
+function handleCutout() {
+  for (let i = 0; i < array.length; i++) {
+    array[i]
+  }
+}
+
 function draw_() {
   // RGB/CNYK Channels & Dither serve as the masters
-  // RGB channels
   let red_c = extractRGBChannel(img, "red");
   let green_c = extractRGBChannel(img, "green");
   let blue_c = extractRGBChannel(img, "blue");
-  // CMYK channels
   let cyan_c = extractCMYKChannel(img, "cyan");
   let magenta_c = extractCMYKChannel(img, "magenta");
   let yellow_c = extractCMYKChannel(img, "yellow");
@@ -183,9 +196,6 @@ function draw_() {
   // start with highlights -> all background
   // add darker and darker layers on top
   // cut if necessary
-  let dithered_1 = ditherImage(img, 'none', 255);
-  let dithered_2 = ditherImage(img, 'none', 120);
-  let dithered_3 = ditherImage(img, 'none', 60);
 }
 
 function addRisoSelection(risoElements) {
@@ -241,8 +251,10 @@ function addRisoLayerOptions(risoElements) {
 
     let container = createDiv();
     container.id(`riso-${risoElements[i].elt.innerHTML}--options-container`);
-    container.style('padding', '4px 0');
+    let [r, g, b] = risoElements[i].elt.style.backgroundColor.match(/[-]{0,1}[\d]*[.]{0,1}[\d]+/g);
+    container.style('background-color', `rgba(${r},${g},${b},0.1)`);
 
+    // Riso label
     let risoColour = createSpan(risoElements[i].elt.innerHTML);
     risoColour.id(`riso-${risoElements[i].elt.innerHTML}--options`);
     risoColour.class(`riso-colour riso-${risoElements[i].elt.innerHTML} riso--options`);
@@ -252,57 +264,72 @@ function addRisoLayerOptions(risoElements) {
     risoColour.html(`${risoElements[i].elt.innerHTML}`);
     risoColour.parent(container);
 
-    // Add options
-    let optionsContainer = createDiv();
-    optionsContainer.style('padding', '8px');
-
     // Fill / Opacity
-    let fillSliderContainer = createSpan('Fill (0 to 255)');
-    let fillSliderValue = createSpan('128');
+    let fillSliderContainer = createDiv('Opacity');
+    fillSliderContainer.class('option--container');
+    let fillSliderValue = createElement('input');
     fillSliderValue.id(`${risoElements[i].elt.innerHTML}_fill_slider_value`);
+    fillSliderValue.attribute('type', 'number');
+    fillSliderValue.attribute('min', '0');
+    fillSliderValue.attribute('max', '255');
+    fillSliderValue.attribute('value', '128');
+    fillSliderValue.style('width', '70px');
     fillSliderValue.style('float', 'right');
+    fillSliderValue.changed(updateRangeInput);
     fillSliderValue.parent(fillSliderContainer);
     let fillSlider = createSlider(0, 255, 128, 1);
     fillSlider.id(`${risoElements[i].elt.innerHTML}_fill_slider`);
     fillSlider.style('width', '100%');
-    fillSlider.input(showInputValue);
+    fillSlider.input(updateNumberInput);
     fillSlider.parent(fillSliderContainer);
-
-    fillSliderContainer.parent(optionsContainer);
+    fillSliderContainer.parent(container);
 
     // Layer X position
-    let positionXContainer = createSpan(`Pos. x (0 to ${ctxWidth})`);
-    let positionXValue = createSpan(`${ctxWidthHalf}`);
+    let positionXContainer = createDiv('Position x');
+    positionXContainer.class('option--container');
+    let positionXValue = createElement('input');
     positionXValue.id(`${risoElements[i].elt.innerHTML}_posX_slider_value`);
+    positionXValue.attribute('type', 'number');
+    positionXValue.attribute('min', '0');
+    positionXValue.attribute('max', '255');
+    positionXValue.attribute('value', `${ctxWidthHalf}`);
+    positionXValue.style('width', '70px');
     positionXValue.style('float', 'right');
     positionXValue.parent(positionXContainer);
     let positionXSlider = createSlider(0, ctxWidth, ctxWidthHalf, 1);
     positionXSlider.id(`${risoElements[i].elt.innerHTML}_posX_slider`);
     positionXSlider.style('width', '100%');
-    positionXSlider.input(showInputValue);
+    positionXSlider.input(updateNumberInput);
     positionXSlider.parent(positionXContainer);
-
-    positionXContainer.parent(optionsContainer);
+    positionXContainer.parent(container);
 
     // Layer Y position
-    let positionYContainer = createSpan(`Pos. y (0 to ${ctxHeight})`);
-    let positionYValue = createSpan(`${ctxHeightHalf}`);
+    let positionYContainer = createDiv('Position y');
+    positionYContainer.class('option--container');
+    let positionYValue = createElement('input');
     positionYValue.id(`${risoElements[i].elt.innerHTML}_posY_slider_value`);
+    positionYValue.attribute('type', 'number');
+    positionYValue.attribute('min', '0');
+    positionYValue.attribute('max', '255');
+    positionYValue.attribute('value', `${ctxHeightHalf}`);
+    positionYValue.style('width', '70px');
     positionYValue.style('float', 'right');
     positionYValue.parent(positionYContainer);
     let positionYSlider = createSlider(0, ctxHeight, ctxHeightHalf, 1);
     positionYSlider.id(`${risoElements[i].elt.innerHTML}_posY_slider`);
     positionYSlider.style('width', '100%');
-    positionYSlider.input(showInputValue);
+    positionYSlider.input(updateNumberInput);
     positionYSlider.parent(positionYContainer);
-
-    positionYContainer.parent(optionsContainer);
+    positionYContainer.parent(container);
 
     // Add dithering selector
-    let ditheringContainer = createSpan('Dithering');
+    let ditheringContainer = createDiv('Dithering');
+    ditheringContainer.class('option--container');
     let ditheringSelector = createSelect();
     ditheringSelector.id(`${risoElements[i].elt.innerHTML}_dithering_selector`);
-    ditheringSelector.style('width', '100%');
+    ditheringSelector.style('float', 'right');
+
+    // ditheringSelector.style('width', '100%');
     ditheringSelector.option('image');
     ditheringSelector.option('atkinson');
     ditheringSelector.option('floydsteinberg');
@@ -311,36 +338,130 @@ function addRisoLayerOptions(risoElements) {
     ditheringSelector.selected('image');
     ditheringSelector.changed(handleDitheringChange);
     ditheringSelector.parent(ditheringContainer);
+    ditheringContainer.parent(container);
 
-    let ditheringThresholdContainer = createSpan('Threshold (0 to 255)');
+    // Add dithering threshold for bayer and none dither types
+    let ditheringThresholdContainer = createDiv('Threshold');
+    ditheringThresholdContainer.class('option--container');
     ditheringThresholdContainer.id(`${risoElements[i].elt.innerHTML}_dithering_threshold`);
-    let ditheringThresholdValue = createSpan('128');
-    ditheringThresholdValue.id(`${risoElements[i].elt.innerHTML}_dithering_threshold_value`);
+    ditheringThresholdContainer.style('display', 'none');
+
+    let ditheringThresholdValue = createElement('input');
+    ditheringThresholdValue.id(`${risoElements[i].elt.innerHTML}_dithering_threshold_slider_value`);
+    ditheringThresholdValue.attribute('type', 'number');
+    ditheringThresholdValue.attribute('min', '0');
+    ditheringThresholdValue.attribute('max', '255');
+    let rgbSum = risoElements[i].elt.style.backgroundColor.match(/[-]{0,1}[\d]*[.]{0,1}[\d]+/g).reduce((a, b) => a + parseInt(b), 0);
+    ditheringThresholdValue.attribute('value', `${Math.round(rgbSum / 3)}`);
+    ditheringThresholdValue.style('width', '70px');
     ditheringThresholdValue.style('float', 'right');
     ditheringThresholdValue.parent(ditheringThresholdContainer);
 
-    let ditheringThresholdSlider = createSlider(0, 255, 128, 1);
+    let ditheringThresholdSlider = createSlider(0, 255, Math.round(rgbSum / 3), 1);
     ditheringThresholdSlider.id(`${risoElements[i].elt.innerHTML}_dithering_threshold_slider`);
     ditheringThresholdSlider.style('width', '100%');
-    ditheringThresholdSlider.input(showInputValue);
+    ditheringThresholdSlider.input(updateNumberInput);
     ditheringThresholdSlider.parent(ditheringThresholdContainer);
 
-    ditheringThresholdContainer.parent(ditheringContainer);
-    ditheringThresholdContainer.style('display', 'none');
-    ditheringContainer.parent(optionsContainer);
+    ditheringThresholdContainer.parent(container);
 
-    optionsContainer.parent(container);
+    // Add empty container for cutout options
+    let cutoutContainer = createDiv('Cutout');
+    cutoutContainer.class('option--container');
+    cutoutContainer.style('display', 'none');
+    let cutoutContent = createDiv();
+    cutoutContent.id(`${risoElements[i].elt.innerHTML}_cutout`);
+    cutoutContent.parent(cutoutContainer);
+    cutoutContainer.parent(container);
+    cutoutContainer.style('display', 'none');
+
     container.style('display', 'none');
     container.parent(allOptionsContainer);
   }
   allOptionsContainer.parent('options--customisation');
 }
 
-function showInputValue(event) {
-  // Update value of inputs
+function updateNumberInput(event) {
+  // Update value of inputs of type number
   let value = event.target.value;
   let feedbackElt = select(`#${event.target.id}_value`);
-  feedbackElt.elt.innerHTML = value;
+  feedbackElt.elt.value = value;
+}
+
+function updateRangeInput(event) {
+  // Update value of inputs of type number
+  let value = event.target.value;
+  let element = `#${event.target.id}`
+  let feedbackElt = select(element.replace('_value', ''));
+  feedbackElt.elt.value = value;
+}
+
+function updateCutoutOptions({ selectedRisoName, selectedRisoColours, operation }) {
+
+  let risoCustomisationContainer = select(`#riso-${selectedRisoName}--options-container`);
+  let currentlySelectedColours = risoObjects.filter(riso => riso.selected);
+
+  if (selectedRisoName && operation === 'add') {
+    for (var i = 0; i < currentlySelectedColours.length; i++) {
+      if (currentlySelectedColours[i].name !== selectedRisoName) {
+        // Add new Riso layer as a cutout option to the other already selected Riso layers
+        let checkbox = createCheckbox(`${selectedRisoName.toLowerCase()}`, false);
+        checkbox.id(`${currentlySelectedColours[i].name}_cutout_${selectedRisoName}`);
+        let cutoutContainer = select(`#${currentlySelectedColours[i].name}_cutout`);
+        checkbox.parent(cutoutContainer);
+        cutoutContainer.style('display', 'flex');
+        cutoutContainer.style('flex-wrap', 'wrap');
+        cutoutContainer.parent().style.display = 'block';
+
+        // Update the cutout options of the new Riso layer with the already selected Riso layers
+        let checkbox_ = createCheckbox(`${currentlySelectedColours[i].name.toLowerCase()}`, false);
+        checkbox_.id(`${selectedRisoName}_cutout_${currentlySelectedColours[i].name}`);
+        let cutoutContainer_ = select(`#${selectedRisoName}_cutout`);
+        checkbox_.parent(cutoutContainer_);
+        cutoutContainer_.style('display', 'flex');
+        cutoutContainer.style('flex-wrap', 'wrap');
+        cutoutContainer_.parent().style.display = 'block';
+      }
+    }
+  } else if (selectedRisoName && operation === 'remove') {
+    // Remove the deselected Riso layer as a cutout option from the other selected Riso layers
+    for (var i = 0; i < currentlySelectedColours.length; i++) {
+      if (currentlySelectedColours[i].name !== selectedRisoName) {
+        let cutoutCheckboxRemoved = select(`#${currentlySelectedColours[i].name}_cutout_${selectedRisoName}`);
+        cutoutCheckboxRemoved.remove();
+        if (currentlySelectedColours.length === 2) {
+          // In case we remove the second last Riso layer, no cutout option left
+          let cutoutContainer = select(`#${currentlySelectedColours[i].name}_cutout`);
+          cutoutContainer.parent().style.display = 'none';
+        }
+      }
+    }
+  } else {
+    // Handle palette selection
+    // for (let i = 0; i < currentlySelectedColours.length; i++) {
+    //   let currentlySelectedColour = currentlySelectedColours[i]
+    //   let otherSelectedColours = currentlySelectedColours.filter(riso => riso.name != currentlySelectedColour.name);
+    //   for (let j = 0; j < otherSelectedColours.length; j++) {
+    //
+    //     currentlySelectedColours[j]
+    //
+    //     // Add new Riso layer as a cutout option to the other already selected Riso layers
+    //     let checkbox = createCheckbox(`${selectedRisoName.toLowerCase()}`, false);
+    //     checkbox.id(`#${currentlySelectedColours[i].name}_cutout_${selectedRisoName}`);
+    //     let cutoutContainer = select(`#${currentlySelectedColours[i].name}_cutout`);
+    //     checkbox.parent(cutoutContainer);
+    //     cutoutContainer.style('display', 'inline-box');
+    //
+    //     // Update the cutout options of the new Riso layer with the already selected Riso layers
+    //     let checkbox_ = createCheckbox(`${currentlySelectedColours[i].name.toLowerCase()}`, false);
+    //     checkbox_.id(`#${selectedRisoName}_cutout_${currentlySelectedColours[i].name}`);
+    //     let cutoutContainer_ = select(`#${selectedRisoName}_cutout`);
+    //     checkbox_.parent(cutoutContainer_);
+    //     cutoutContainer_.style('display', 'inline-box');
+    //
+    //   }
+    // }
+  }
 }
 
 function handleDitheringChange(event) {
@@ -356,66 +477,85 @@ function handleDitheringChange(event) {
 
 function selectUnselectColour() {
   // Unhide the Riso colour in the selection section
-  let selectedRiso = select(`#riso-${this.elt.innerHTML}--element`);
+  let selectedRisoName = this.elt.innerHTML;
+  let selectedRisoElt = select(`#riso-${selectedRisoName}--element`);
 
   // Unhide the Riso colour in the customisation options section
-  let selectedRisoOptions = (`#riso-${this.elt.innerHTML}--options-container`);
+  let selectedRisoOption = select(`#riso-${selectedRisoName}--options-container`);
 
-  if (selectedRiso.elt.style.display === 'none') {
+  if (selectedRisoElt.elt.style.display === 'none') {
     risoMode = true;
-    selectedRiso.style('display', 'inline');
-    selectedRisoOptions.style('display', 'block');
+    updateCutoutOptions({selectedRisoName, operation: 'add'});
+    selectedRisoElt.style('display', 'inline');
+    selectedRisoOption.style('display', 'block');
     // Update index of selected colour
-    risoLayersSelected[risoColoursNames.indexOf(this.elt.innerHTML.toUpperCase())] = true;
+    // risoLayersSelected[risoColoursNames.indexOf(this.elt.innerHTML.toUpperCase())] = true;
+    let obj = risoObjects.find(riso => riso.name === selectedRisoName.toUpperCase());
+    obj.selected = true;
   } else {
-    selectedRiso.style('display', 'none');
-    selectedRisoOptions.style('display', 'none');
-    risoLayersSelected[risoColoursNames.indexOf(this.elt.innerHTML.toUpperCase())] = false;
+    updateCutoutOptions({selectedRisoName, operation: 'remove'});
+    selectedRisoElt.style('display', 'none');
+    selectedRisoOption.style('display', 'none');
+    // risoLayersSelected[risoColoursNames.indexOf(this.elt.innerHTML.toUpperCase())] = false;
+    let obj = risoObjects.find(riso => riso.name === selectedRisoName.toUpperCase());
+    obj.selected = false;
   }
 
   // Enable Riso mode if at least one colour has been selected
-  if (risoLayersSelected.includes(true)) {
+  let obj = risoObjects.find(riso => riso.selected);
+  if (risoObjects.find(riso => riso.selected)) {
     risoMode = true;
   } else {
     risoMode = false;
   }
+  //
+  // if (risoLayersSelected.includes(true)) {
+  //   risoMode = true;
+  // } else {
+  //   risoMode = false;
+  // }
 }
 
 function selectPalette(palette) {
   // Hide all selected colours/options and unhide only those in palette
-  let selectedColours = select('#selected-colours');
+  let selectedRisoColours = select('#selected-colours').elt.childNodes;
   palette = palette.map(colour => colour.name);
   // Customisation options
-  let selectedRisoOptions = select('#options--customisation-container');
+  let selectedRisoOptions = select('#options--customisation-container').elt.childNodes;
 
-  for (let i = 0; i < selectedColours.elt.childNodes.length; i++) {
-    let colour = selectedColours.elt.childNodes[i];
-    let colourOptions = selectedRisoOptions.elt.childNodes[i];
+  for (let i = 0; i < selectedRisoColours.length; i++) {
+    let colour = selectedRisoColours[i];
+    let colourOptions = selectedRisoOptions[i];
+    let obj = risoObjects.find(riso => riso.name === colour.innerHTML.toUpperCase());
+
     if (palette.includes(colour.innerHTML)) {
       risoMode = true;
       colour.style.display = 'inline';
       colourOptions.style.display = 'block';
-      risoLayersSelected[risoColoursNames.indexOf(colour.innerHTML.toUpperCase())] = true;
+      // risoLayersSelected[risoColoursNames.indexOf(colour.innerHTML.toUpperCase())] = true;
+      obj.selected = true;
     } else {
       colour.style.display = 'none';
       colourOptions.style.display = 'none';
-      risoLayersSelected[risoColoursNames.indexOf(colour.innerHTML.toUpperCase())] = false;
+      obj.selected = false;
     }
   }
+  updateCutoutOptions({selectedRisoColours});
 }
 
 function createRisoObjects(colours) {
-  let risoObject = {}
+  let allRisoObjects = [];
   for (let i = 0; i < colours.length; i++) {
     let colour = colours[i];
     let riso = new Riso(colour);
-    risoObject = {
-      ...risoObject,
-      [colour]: riso
-    }
-    risoLayersSelected.push(false);
+    allRisoObjects.push({
+      name: colour,
+      riso,
+      selected: false,
+    })
+    // risoLayersSelected.push(false);
   }
-  return risoObject;
+  return allRisoObjects;
 }
 
 function getRandomIntInclusive(min, max) {
@@ -434,7 +574,7 @@ function getRandomIntInclusive(min, max) {
 // }
 
 function debug() {
-  console.log(risoMode);
+  console.log(risoObjects);
 }
 
 function refresh() {

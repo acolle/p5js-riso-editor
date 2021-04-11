@@ -8,7 +8,7 @@ let imgHeight;
 let risoColours;
 let risoColoursNames;
 let risoObjects;
-let risoLayersSelected = [];
+let risoLayersPrinted = [];
 let risoMode = false;
 let ditherType = 'atkinson';
 
@@ -105,12 +105,15 @@ function draw() {
 
     clearRiso();
 
+    let selected
+
     for (let i = 0; i < risoObjects.length; i++) {
       if (risoObjects[i].selected) {
 
+        risoLayersPrinted.push(risoObjects[i]);
+
         let src = img;
 
-        //
         let risoLayer = risoObjects[i].riso;
         risoLayer.imageMode(CENTER);
 
@@ -149,9 +152,7 @@ function draw() {
       }
     }
 
-    // directly inside above loop?
-    // handleCutout();
-
+    handleCutout(risoLayersPrinted);
     drawRiso();
 
   } else {
@@ -175,9 +176,16 @@ function draw() {
 
 }
 
-function handleCutout() {
-  for (let i = 0; i < array.length; i++) {
-    array[i]
+function handleCutout(layers) {
+  for (let i = 0; i < layers.length; i++) {
+    let risoLayer = layers[i];
+    let otherRisoLayers = layers.filter(riso => riso.name != risoLayer.name);
+    for (let j = 0; j < otherRisoLayers.length; j++) {
+      let checkbox = select(`#${risoLayer.name}_cutout_${otherRisoLayers[j].name}`);
+      if (checkbox.selected()) {
+        risoLayer.riso.cutout(otherRisoLayers[j].riso);
+      }
+    }
   }
 }
 
@@ -396,12 +404,13 @@ function updateRangeInput(event) {
   feedbackElt.elt.value = value;
 }
 
-function updateCutoutOptions({ selectedRisoName, selectedRisoColours, operation }) {
+function toggleCutoutOptions({ selectedRisoName, selectedRisoColours, operation }) {
 
   let risoCustomisationContainer = select(`#riso-${selectedRisoName}--options-container`);
   let currentlySelectedColours = risoObjects.filter(riso => riso.selected);
 
   if (selectedRisoName && operation === 'add') {
+    // Handle single Riso layer added
     for (var i = 0; i < currentlySelectedColours.length; i++) {
       if (currentlySelectedColours[i].name !== selectedRisoName) {
         // Add new Riso layer as a cutout option to the other already selected Riso layers
@@ -424,43 +433,44 @@ function updateCutoutOptions({ selectedRisoName, selectedRisoColours, operation 
       }
     }
   } else if (selectedRisoName && operation === 'remove') {
-    // Remove the deselected Riso layer as a cutout option from the other selected Riso layers
+    // Handle single Riso layer removed
     for (var i = 0; i < currentlySelectedColours.length; i++) {
       if (currentlySelectedColours[i].name !== selectedRisoName) {
+        // Remove the deselected Riso layer as a cutout option from the other selected Riso layers
         let cutoutCheckboxRemoved = select(`#${currentlySelectedColours[i].name}_cutout_${selectedRisoName}`);
         cutoutCheckboxRemoved.remove();
+
+        // Remove all the cutout options of the deleted Riso layer
+        let cutoutCheckboxRemoved_ = select(`#${selectedRisoName}_cutout_${currentlySelectedColours[i].name}`);
+        cutoutCheckboxRemoved_.remove();
+
+        // In case we remove the second last Riso layer, no cutout option left
         if (currentlySelectedColours.length === 2) {
-          // In case we remove the second last Riso layer, no cutout option left
           let cutoutContainer = select(`#${currentlySelectedColours[i].name}_cutout`);
           cutoutContainer.parent().style.display = 'none';
         }
       }
     }
   } else {
-    // Handle palette selection
-    // for (let i = 0; i < currentlySelectedColours.length; i++) {
-    //   let currentlySelectedColour = currentlySelectedColours[i]
-    //   let otherSelectedColours = currentlySelectedColours.filter(riso => riso.name != currentlySelectedColour.name);
-    //   for (let j = 0; j < otherSelectedColours.length; j++) {
-    //
-    //     currentlySelectedColours[j]
-    //
-    //     // Add new Riso layer as a cutout option to the other already selected Riso layers
-    //     let checkbox = createCheckbox(`${selectedRisoName.toLowerCase()}`, false);
-    //     checkbox.id(`#${currentlySelectedColours[i].name}_cutout_${selectedRisoName}`);
-    //     let cutoutContainer = select(`#${currentlySelectedColours[i].name}_cutout`);
-    //     checkbox.parent(cutoutContainer);
-    //     cutoutContainer.style('display', 'inline-box');
-    //
-    //     // Update the cutout options of the new Riso layer with the already selected Riso layers
-    //     let checkbox_ = createCheckbox(`${currentlySelectedColours[i].name.toLowerCase()}`, false);
-    //     checkbox_.id(`#${selectedRisoName}_cutout_${currentlySelectedColours[i].name}`);
-    //     let cutoutContainer_ = select(`#${selectedRisoName}_cutout`);
-    //     checkbox_.parent(cutoutContainer_);
-    //     cutoutContainer_.style('display', 'inline-box');
-    //
-    //   }
-    // }
+    // Handle colours palette added
+    for (let i = 0; i < currentlySelectedColours.length; i++) {
+
+      let currentlySelectedColour = currentlySelectedColours[i];
+      let otherSelectedColours = currentlySelectedColours.filter(riso => riso.name != currentlySelectedColour.name);
+
+      for (let j = 0; j < otherSelectedColours.length; j++) {
+        // Add new Riso layer as a cutout option to the other already selected Riso layers
+        if (! select(`#${otherSelectedColours[j].name}_cutout_${currentlySelectedColour.name}`) && otherSelectedColours[j].name !== currentlySelectedColour.name) {
+          let checkbox = createCheckbox(`${currentlySelectedColour.name.toLowerCase()}`, false);
+          checkbox.id(`${otherSelectedColours[j].name}_cutout_${currentlySelectedColour.name}`);
+          let cutoutContainer = select(`#${otherSelectedColours[j].name}_cutout`);
+          checkbox.parent(cutoutContainer);
+          cutoutContainer.style('display', 'flex');
+          cutoutContainer.style('flex-wrap', 'wrap');
+          cutoutContainer.parent().style.display = 'block';
+        }
+      }
+    }
   }
 }
 
@@ -485,18 +495,16 @@ function selectUnselectColour() {
 
   if (selectedRisoElt.elt.style.display === 'none') {
     risoMode = true;
-    updateCutoutOptions({selectedRisoName, operation: 'add'});
+    toggleCutoutOptions({selectedRisoName, operation: 'add'});
     selectedRisoElt.style('display', 'inline');
     selectedRisoOption.style('display', 'block');
     // Update index of selected colour
-    // risoLayersSelected[risoColoursNames.indexOf(this.elt.innerHTML.toUpperCase())] = true;
     let obj = risoObjects.find(riso => riso.name === selectedRisoName.toUpperCase());
     obj.selected = true;
   } else {
-    updateCutoutOptions({selectedRisoName, operation: 'remove'});
+    toggleCutoutOptions({selectedRisoName, operation: 'remove'});
     selectedRisoElt.style('display', 'none');
     selectedRisoOption.style('display', 'none');
-    // risoLayersSelected[risoColoursNames.indexOf(this.elt.innerHTML.toUpperCase())] = false;
     let obj = risoObjects.find(riso => riso.name === selectedRisoName.toUpperCase());
     obj.selected = false;
   }
@@ -508,12 +516,6 @@ function selectUnselectColour() {
   } else {
     risoMode = false;
   }
-  //
-  // if (risoLayersSelected.includes(true)) {
-  //   risoMode = true;
-  // } else {
-  //   risoMode = false;
-  // }
 }
 
 function selectPalette(palette) {
@@ -532,7 +534,6 @@ function selectPalette(palette) {
       risoMode = true;
       colour.style.display = 'inline';
       colourOptions.style.display = 'block';
-      // risoLayersSelected[risoColoursNames.indexOf(colour.innerHTML.toUpperCase())] = true;
       obj.selected = true;
     } else {
       colour.style.display = 'none';
@@ -540,7 +541,7 @@ function selectPalette(palette) {
       obj.selected = false;
     }
   }
-  updateCutoutOptions({selectedRisoColours});
+  toggleCutoutOptions({selectedRisoColours});
 }
 
 function createRisoObjects(colours) {
@@ -553,7 +554,6 @@ function createRisoObjects(colours) {
       riso,
       selected: false,
     })
-    // risoLayersSelected.push(false);
   }
   return allRisoObjects;
 }
@@ -564,14 +564,6 @@ function getRandomIntInclusive(min, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
-// Change dither type
-// function keyReleased() {
-//   if (key == 1) ditherType = 'atkinson';
-//   else if (key == 2) ditherType = 'floydsteinberg';
-//   else if (key == 3) ditherType = 'bayer';
-//   else if (key == 4) ditherType = 'none';
-// }
 
 function debug() {
   console.log(risoObjects);

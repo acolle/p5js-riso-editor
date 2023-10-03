@@ -9,6 +9,7 @@ html, body {
   width: 100vw; */
   /* ghost white */
   background-color: #f8f8ff;
+  font-family: 'Inter', Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
 body {
@@ -32,7 +33,7 @@ button {
   color: #f8f8ff;
   border-radius: 4px;
   letter-spacing: 0.025em;
-  background-color: #A8A8FF;
+  background-color: #8bc8ff;
   text-decoration: none;
   -webkit-transition: all 150ms ease;
   transition: all 150ms ease;
@@ -40,7 +41,7 @@ button {
 
 button:hover {
   cursor: pointer;
-  background-color: #7575FF;
+  background-color: #3fa4ff;
   box-shadow: 0 7px 14px rgba(50, 50, 93, .10), 0 3px 6px rgba(0, 0, 0, .08);
 }
 
@@ -50,20 +51,28 @@ button:hover {
   justify-content: center;
 }
 
-#options {
+#options--container {
   position: absolute;
   top: 10px;
   right: 10px;
   bottom: 10px;
   background-color: #f0f8ff;
-  border: 1px solid #f0f8ff;
+  border: 1px solid #d7ecff;
   width: 25vw;
   padding: 12px;
-  overflow: auto;
-
-  /* display: flex;
+  display: flex;
   flex-direction: column;
-  justify-content: space-between; */
+  justify-content: space-between;
+}
+
+#options {
+  overflow: auto;
+}
+
+#button--action {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
 }
 
 /* Option icons */
@@ -73,7 +82,7 @@ button:hover {
     display: block;
     width: 22px;
     height: 22px;
-    border: 2px solid #aadcff;
+    border: 2px solid #a4d4ff;
     transform: scale(var(--ggs,1));
     border-radius: 40px;
     cursor: pointer;
@@ -89,8 +98,8 @@ button:hover {
 .gg-arrow-left-o::after {
     width: 6px;
     height: 6px;
-    border-bottom: 2px solid #aadcff;
-    border-left: 2px solid #aadcff;
+    border-bottom: 2px solid #a4d4ff;
+    border-left: 2px solid #a4d4ff;
     transform: rotate(45deg);
     bottom: 6px
 }
@@ -98,7 +107,7 @@ button:hover {
     width: 10px;
     height: 2px;
     bottom: 8px;
-    background: #aadcff;
+    background: #a4d4ff;
 }
 .gg-close-o::after,
 .gg-close-o::before {
@@ -108,7 +117,7 @@ button:hover {
   position: absolute;
   width: 12px;
   height: 2px;
-  background: #aadcff;
+  background: #a4d4ff;
   transform: rotate(45deg);
   border-radius: 5px;
   top: 8px;
@@ -139,6 +148,7 @@ button:hover {
 .riso--options {
   font-size: 1.2em;
   padding: 8px 2px;
+  margin: 0;
 }
 
 .riso-WHITE, .riso-CLEARMEDIUM, .riso-YELLOW, .riso-LIGHTLIME {

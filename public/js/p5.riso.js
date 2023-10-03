@@ -81,13 +81,18 @@ const RISOCOLORS = [
   {name: 'FLUORESCENTGREEN', color: [68, 214, 44]}
 ];
 
-function _getP5Instance() {
-  return window._p5Instance || p5.instance
+let p5instance;
+
+function _getP5Instance(instance) {
+  if (instance) {
+    p5instance = instance;
+  }
+  return p5instance || window._p5Instance || p5.instance
 }
 
 class Riso extends p5.Graphics {
-  constructor(channelColor, w, h) {
-    const p = _getP5Instance();
+  constructor({ channelColor, w, h, p5instance }) {
+    const p = _getP5Instance(p5instance);
     if (!w) w = p.width;
     if (!h) h = p.height;
 
